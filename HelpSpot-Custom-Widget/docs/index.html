@@ -1,0 +1,975 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>HelpSpot Custom Widget Plugin 1.0</title>
+		
+		<!-- the widget plugin requires jQuery, so be sure to include it! -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js?ver=2.9.2" type="text/javascript"></script>
+		
+		<!-- include the syntax code highlighter -->
+		<script type="text/javascript" src="http://balupton.github.com/jquery-syntaxhighlighter/scripts/jquery.syntaxhighlighter.min.js"></script>
+		<script type="text/javascript">
+			$.SyntaxHighlighter.init({
+				'highlight': true,
+				'lineNumbers': true,
+				'wrapLines': false
+			});
+		</script>
+		
+		<!-- Random jQuery actions we'll use -->
+		<script type="text/javascript">
+			$(function(){
+				
+				$('#toc-toggle').click(function(){
+					$('#toc-contents').stop(true, true).slideToggle(300);
+					$(this).toggleClass('expanded', '');
+				});
+				
+				$('#toc a').click(function(){
+					$('#toc-contents').stop(true, true).slideUp(300);
+					$('#toc-toggle').removeClass('expanded');
+				});
+				
+			});
+		</script>
+		
+		<style type="text/css">
+			
+			html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+			
+			p { margin: 0 0 15px 0; padding: 0; font-family: Arial, Verdana, sans-serif; font-size: 14px; line-height: 20px;}
+			
+			small { font-size: 12px; }
+			
+			h1, h2, h3, h4 {
+				font-family: Arial, Verdana, sans-serif;
+			}
+			
+			h1 { 
+				font-size: 24px;
+				line-height: 29px;
+				font-weight: bold;
+				letter-spacing: 0;
+				margin: 0 0 25px 0;
+				padding: 0 0 10px 0;
+				border-bottom: 5px solid #ddd;
+			}
+				
+			h2 { 
+				font-size: 20px;
+				line-height: 24px;
+				font-weight: bold;
+				letter-spacing: 0;
+				margin: 50px 0 10px 0;
+				padding: 30px 0 5px 0 !important;
+				border-top: 3px solid #ddd;
+			}	
+			
+			h3 { 
+				font-size: 16px;
+				line-height: 20px;
+				font-weight: bold;
+				letter-spacing: 0;
+				margin: 25px 0 5px 0 !important;
+				padding: 0;
+			}	
+			
+			#wrapper {
+				width: 986px;
+				margin: 0 auto;
+				padding: 25px 0 50px 0;	
+			}
+			
+			span.new, span.updated { vertical-align: super; }
+			
+			span.new {
+				width: 31px;
+				height: 12px;
+				display:inline-block;
+				margin: 0;
+				background:url(images/new.gif) no-repeat 0 0;
+			}
+			
+			span.updated {
+				width: 49px;
+				height: 12px;
+				display:inline-block;
+				margin: 0;
+				background:url(images/updated.gif) no-repeat 0 0;
+			}
+			
+			ul { padding: 0 0 0 50px; margin: 0 0 15px 0; }
+			ul ul { padding: 10px 0 0 50px;  }
+			ul li { list-style: disc outside; margin: 0 0 10px 0; font-family: Arial, Verdana, sans-serif; font-size: 14px; line-height: 20px; }
+			ul.no-bullets li { list-style: none; }
+			
+			u { text-decoration: underline; }
+			
+			table {
+				border: 1px solid #ddd;
+				border-right: none
+				font-family: Arial, Verdana, sans-serif;
+			}
+			
+			table tr th {
+				border-bottom: 1px solid #ddd;
+				border-right: 1px solid #ddd;
+				text-align:left;
+				font-size: 12px;
+				font-weight: bold;
+				font-family: Arial, Verdana, sans-serif;
+				padding: 5px ;
+				background: #177FB7;
+				color: #fff;
+			}
+				
+				
+			table tr td {
+				padding: 2px;
+				border-bottom: 1px solid #ddd;
+				border-right: 1px solid #ddd;
+				font-family: Arial, Verdana, sans-serif;
+				font-size: 12px;
+				line-height: 16px;
+				padding: 5px;
+			}	
+			
+			table th.status, table td.status {
+					width: 100px;
+					text-align: center !important;
+			}
+			
+			table tr.even td {
+					background: #f7f7f7;
+			}
+			
+			table tr td.required { background: #FFEAEC; text-align:center; }
+			
+			table tr.divider td {
+					background: #f1f1f1;
+					text-align:left;
+					padding: 10px 5px;
+					font-weight: bold;
+					font-size: 14px;
+			}
+			
+			pre.code {
+					background: #fafafa;
+					border: 1px dashed #ccc;
+					border-radius: 4px;
+					-moz-border-radius: 4px;
+					padding: 20px;
+					width: 98&;
+					overflow-x:visible;
+					font-family:monospace;
+					font-size: 10px;
+					line-height: 17px;
+			}
+			
+			.messages {
+				background: #FFFEE8;
+				border: 1px solid #E8E38B;
+				padding: 10px;
+			}
+			
+			.messages p {
+					margin: 5px 0;
+					padding: 0;
+					font-family: Arial, Verdana, sans-serif;
+					font-size: 12px;
+					line-height: 16px;
+			}
+			
+			code, code a {
+				font-family: monospace;
+				font-size: 14px;
+				padding: 0;
+				font-weight: normal;
+				color: #DD7213 !important;
+			}
+			
+			span.highlight {
+				background: #FFFBC4 !important;
+				padding: 2px;
+				font-weight: bold;
+			}
+			
+			#toc {
+				position: fixed;
+				top: 0;
+				left: 0;
+				z-index: 555;
+			}
+			
+			#toc h3 { 
+				font-weight: normal;
+				font-size: 14px;
+				background: #177FB7;
+				color: #fff;
+				border: 1px solid #ddd;
+				text-align: center;
+				cursor: pointer; 
+				margin: 0 !important; 
+				padding: 5px !important; 
+			}
+			
+			#toc h3.expanded { 
+				background: #177FB7 url(images/close.gif) no-repeat 95% 50%;
+			}
+			
+			#toc ul { margin: 0 0 0 15px !important; padding: 0 !important; }
+			#toc ul#toc-contents { 
+				width: 275px;
+				max-height: 500px;
+				display: none; 
+				background: #f7f7f7;
+				border: 1px solid #ddd;
+				border-top: none;
+				padding: 10px 5px 5px !important;
+				margin: 0 !important;
+				overflow: hidden;
+				overflow-y: scroll;
+			}
+			#toc ul li { margin: 0 0 5px 5px !important; padding: 0 !important; list-style:none; }
+			#toc ul ul { margin: 0px 0 10px 15px !important; padding: 5px 0 0 0 !important; }
+			#toc ul li li { margin: 0 0 5px 5px !important; padding: 0 !important; list-style: disc inside; font-size: 12px; }
+			
+			
+	
+		</style>
+		
+	</head>
+	<body>
+		
+		
+		<div id="wrapper">
+
+			<div id="toc">
+				<h3 id="toc-toggle">Table of Contents</h3>
+				<ul id="toc-contents">
+					<li>
+						HelpSpot Custom Widget Plugin 1.0
+						<ul>
+							<li><a href="#intro">Introduction</a></li>
+							<li><a href="#demo">Live Demo</a></li>
+							<li><a href="#new">What's New in this Version?</a></li>
+							<li><a href="#requirements">Requirements</a></li>
+						</ul>
+					</li>
+					<li>
+						Downloading and Using the Plugin
+						<ul>
+							<li><a href="#download">Download the Plugin</a></li>
+							<li><a href="#install">Installing and Initializing the Plugin</a></li>
+						</ul>
+					</li>
+					<li>
+						Parameters and Options
+						<ul>
+							<li><a href="#parameters">All Parameters</a></li>
+							<li><a href="#p-customization-options">Customization Options</a></li>
+							<li><a href="#p-text-labels">Text Labels</a></li>
+							<li><a href="#p-populate-fields">Pre-Populating Fields</a></li>
+							<li><a href="#p-callback">Callback Functions</a></li>
+						</ul>
+					</li>
+						
+					<li>
+						Customizing the Plugin
+						<ul>
+							<li><a href="#customize">Customizing the Plugin</a></li>
+							<li><a href="#pre-populate">How to Pre-Populate the Form Fields</a></li>
+						</ul>
+					</li>
+					<li>
+						Using Themes
+						<ul>
+							<li><a href="#themes">How to Use Themes</a></li>
+							<li><a href="#creating-themes">Creating Your Own Themes</a></li>
+						</ul>
+					<li>
+					<li>
+						Using, Customizing, and Creating Forms
+						<ul>
+							<li><a href="#forms">Getting Started with Forms</a></li>
+							<li><a href="#ajax-dependency">Forms and their Dependence on AJAX</a></li>
+							<li><a href="#ajax-validation-option">Forms and the AJAX Validation Option</a></li>
+							<li><a href="#using-ajax-validation">Using AJAX Validation on Your Forms</a></li>
+							<li><a href="#create-form">Creating a Custom Form</a></li>
+						</ul>
+					</li>
+					<li>
+						Custom Tabs
+						<ul>
+							<li><a href="#tabs">Creating Custom Tabs</a></li>
+						</ul>
+					</li>
+					
+				</ul>
+			</div>
+			
+			<h1>HelpSpot Custom Widget Plugin 1.0</h1>
+			
+			<a name="intro"><a/>
+			<p><a href="http://helpspot.com" target="_blank">HelpSpot</a> is an excellent, web-based Help Desk/Support Center solution. While they are constantly working to improve their software, one of the things they have not gotten around to updating yet is their "widgets" (the contact forms that you add to your page, which integrate into your HelpSpot account).</p>
+			
+			<p>That's where this plugin, <code>HelpSpot-Custom-Widget</code>, comes in. It basically clones the default HelpSpot widget, but gives you <b>much</b> more control over the forms, as well as many more customization options.</p>
+			
+			<h2><a name="demo"></a>Live Demo</h2>		
+			<p>To see a live demo please visit <a href="http://labs.mikeeverhart.net/helpspot" target="_blank">http://labs.mikeeverhart.net/helpspot</a>.
+			
+			<h2><a name="new"></a>What's New in This Version?</h2>
+			<p>This is the first "official" (non-beta) release of this plugin, so there were several improvements made:</p>
+			<ul>
+				<li>
+					<p>The most notable improvement was that the forms are now loaded inside of an AJAX "ligthbox" instead of an iFrame. Let's face it... iFrames are so 1999. Plus, by loading the forms in a lightbox, things just work better: The forms automatically resize better, we no longer have to include our stylesheets and javascript libraries multiple times, and more!</p>
+					<p>One of the only downsides -- if you want to call it that -- of using the lightbox is that <a href="#ajax-dependency">everything now depends on AJAX</a> -- loading the forms, submitting the data, etc. However, on a positive note, this really improved the "flow" of things (improving user experience). This also gave me the opportunity to implement the <a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/" target="_blank">jQuery AJAX Validation library</a> to help you easily validate your form fields! I also think that, due to the improvements in user experience, it was a fair trade-off for any advantages that may have been lost by no longer using an iFrame.</p>
+				</li>
+				<li>The ability to use and create themes; making it even easier to customize how your forms look. There are four [very basic] themes, not counting the default theme, included.</li>
+				<li>Even more customization options!</li>
+			</ul>
+			
+			<h2><a name="requirements"></a>Requirements</h2>
+			<p>There are only two things required to use this plugin:</p>
+			<ul>
+				<li>Obviously, you need an account with <a href="http://www.helpspot.com" target=_blank">HelpSpot</a></li>
+				<li>Secondly, this plugin requires jQuery to work. If you're already using jQuery on your site, great! If not, you will need to include it for the plugin to work (there are instructions below on how to do this.)</li>
+			</ul>
+			
+			<h2><a name="download"></a>Downloading the Plugin</h2>
+			<table class="styled" width="100%" cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Type</th>
+						<th>Location</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Git</td>
+						<td>git@github.com:plasticbrain/HelpSpot-Custom-Widget.git</td>
+					</tr>
+					<tr>
+						<td>Raw Files</td>
+						<td><a href="https://github.com/plasticbrain/HelpSpot-Custom-Widget" target="_blank">https://github.com/plasticbrain/HelpSpot-Custom-Widget</a></td>
+					</tr>
+					<tr>
+						<td>tar.gz</td>
+						<td><a target="_blank" href="https://github.com/plasticbrain/HelpSpot-Custom-Widget/tarball/master">https://github.com/plasticbrain/HelpSpot-Custom-Widget/tarball/master</a></td>
+					</tr>
+					<tr>
+						<td>.zip</td>
+						<td><a target="_blank" href="https://github.com/plasticbrain/HelpSpot-Custom-Widget/zipball/master">https://github.com/plasticbrain/HelpSpot-Custom-Widget/zipball/master</a></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<h2><a name="install"></a>Installing and Using the Plugin</h2>
+			<p>To install the plugin simply upload the entire directory (<code>HelpSpot-Custom-Widget/</code>) to your server. Generally, it's recommended that you upload it to the root directory of your server, although this is not necessary.</p>
+			
+			<h3>Initializing the Plugin</h3>
+			<p>You must include (at a minimum) the following code on any page where you want the Widget to display. <u><b>NOTE:</b> You may need to adjust the file locations depending on where you uploaded the plugin files</u>!</p>
+			<pre class="highlight">
+			
+			&lt;!-- include our base stylesheet --&gt;
+			&lt;link href="HelpSpot-Custom-Widget/widget.css" rel="stylesheet" type="text/css" media="screen" /&gt;
+			
+			&lt;!-- include jQuery --&gt;
+			&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js&gt;&lt;/script&gt;
+			
+			&lt;!-- include widget.js -->
+			&lt;script type="text/javascript" src="HelpSpot-Custom-Widget/widget.js">&lt;/script&gt;
+			
+			&lt;!-- setup and initialize the widget plugin --&gt;
+			&lt;script type="text/javascript"&gt;
+			$(function(){
+			
+			   // you could probably bind this to just about any element...
+			   $('html').HelpSpotWidget({
+				
+			       // the base url to where HelpSpot is installed (***include trailing slash***)
+			       host: 'http://support.yourdomain.com/',
+				
+			       // the base url to where the widget plugin is located (***include trailing slash***)
+			       base: 'HelpSpot-Custom-Widget/'
+			   });
+			});	
+			&lt;/script&gt;
+			</pre>
+			
+			<h2><a name="parameters"></a>Plugin Parameters and Options <span class="updated" title="This section has been updated"></span></h2>
+			<table class="styled" width="100%" cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Object/Propery</th>
+						<th class="status">Required?</th>
+						<th>Default Value</th>
+						<th>Notes/Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+						<tr class="divider">
+						<td colspan="4">
+							URLs, Paths, and General Settings 
+							<span class="updated" title="This section has been updated"></span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>host</td> 
+						<td class="status required">Required</td>
+						<td></td>
+						<td>The base URL of where you've installed HelpSpot -- include a traling slash!</td>
+					</tr>
+					<tr>
+						<td>base</td> 
+						<td class="status required">Required</td>
+						<td></td>
+						<td>If the files for this widget are located in a different directory, then enter the directory here. <br /> "relative" URLs are fine (ie: ../helpspot-widget) -- be sure to include a traling slash!</td>
+					</tr>
+					<tr>
+						<td>ajax</td> 
+						<td class="status required">Required</td>
+						<td>ajax.php</td>
+						<td>The file that will query the HelpSpot API via AJAX</td>
+					</tr>
+					<tr>
+						<td>form</td>
+						<td class="status required">Required</th>
+						<td>form.php</td>
+						<td>The is the actual <a href="#forms">PHP form</a> that you want to use</td>
+					</tr>
+					<tr>
+						<td>ajax_validation</td>
+						<td class="status required">Required</th>
+						<td>true</td>
+						<td>Whether or not to use the jQuery AJAX Validation library to validate your form. <br /><b>NOTE</b>: If this option is set to <code>false</code> then you will need to create your own methods of validating the data, submitting the data the HelpSpot API, etc. <a href="#ajax-validation-option">More on this below</a>. </td>
+					</tr>
+					<tr>
+						<td>faqs</d>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>The url (not including the 'host' or 'base') to your FAQs (or equivalent) HelpSpot Portal page</td>
+					</tr>
+					
+					<tr class="divider">
+						<td colspan="4">
+							<a name="p-customization-options"></a>
+							Customization Options <span class="updated" title="This section has been updated"></span> &nbsp; 
+							<small><a href="#customize">Learn More</a></small>
+							
+						</td>
+					</tr>
+					
+					<tr>
+						<td>overlay_opacity</td>
+						<td class="status">Optional</td>
+						<td>40</td>
+						<td>
+							This determines how dark the content "overlay" should be (the element that "blacks out" your page content, and that the contact form is loaded on top of)
+							<br /><b>Use whole numbers only, and no "%" signs!</b> You can use any value between <code>0</code> and <code>100</code> -- Setting this to <code>0</code> will make the overlay "invisible". Setting it <code>100</code> will "black out" your entire page.
+						</td>
+					</tr>
+					<tr>
+						<td>close_on_overlay_click</td>
+						<td class="status">Optional</td>
+						<td>true</td>
+						<td>Whether or not to close the form/lightbox if the user clicks on the transparent overlay</td>
+					</tr>
+					<tr>
+						<td>tab_type</td>
+						<td class="status">Optional</td>
+						<td>support</td>
+						<td>
+						Determines which tab image to show (current options are: support, feedback, help, questions). There is also a psd file located in the images/ directory if you want to <a href="#tabs">make your own tabs</a>.
+						</td>
+					</tr>
+					<tr>
+						<td>tab_color</td>
+						<td class="status">Optional</td>
+						<td>#000000</td>
+						<td>Defines what color to use for the tab's background</td>
+					</tr>
+					<tr>
+						<td>tab_top</td>
+						<td class="status">Optional</td>
+						<td>30%</td>
+						<td>How far from the top of the page to show the tab. Can be in % or px.</td>
+					</tr>
+					<tr>
+						<td>tab_alignment</td>
+						<td class="status">Optional</td>
+						<td>right</td>
+						<td>Where to position the tab on the page (left or right)</td>
+					</tr>
+					<tr>
+						<td>width</td>
+						<td class="status">Optional</yt>
+						<td>500px</td>
+						<td>the width of the "popup" form. 500px seems to be an overall "good" width to use...but use whatever you want, I guess.</td>
+					</tr>
+					<tr>
+						<td>height</td>
+						<td class="status">Optional</td>
+						<td>575px</td>
+						<td>the height of the "popup" form. This may vary based on the forn you're using -- adjust accordingly!</td>
+					</tr>
+
+					<tr class="divider">
+						<td colspan="4">
+							<a name="p-text-labels"></a>
+							Text Labels 
+							<span class="updated" title="This section has been updated"></span>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>submit_button_text</td>
+						<td class="status">Optional</td>
+						<td>Submit</td>
+						<td>The text that will be shown on the "submit" button on the form</d>
+					</tr>
+					<tr>
+						<td>submitting_text</td>
+						<td class="status">Optional</td>
+						<td>Please wait while we submit your request...</td>
+						<td>The text that is shown after the user submits the form, and is waiting on a response</d>
+					</tr>
+					<tr>
+						<td>success_headline_text</td>
+						<td class="status">Optional</td>
+						<td>Your Message Has Been Received!</td>
+						<td>The "headline" text that the user will see once they have completed signing up</td>
+					</tr>
+					<tr>
+						<td>success_body_text</td>
+						<td class="status">Optional</td>
+						<td>We will review your submission and someone will reply to you soon.</td>
+						<td>A small blurb (about a paragraph) of text that users will after they have signed up</td>
+					</tr>
+					
+					
+					<tr class="divider">
+						<td colspan="4">
+							<a name="p-populate-fields"></a>
+							Pre-populating Form Fields &nbsp; <small><a href="#pre-populate">Learn More</a></small>
+						</td>
+					</tr>
+					
+					<tr>
+						<td>default_first_name</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>Will pre-populate the support form with the user's first name</td>
+					</tr>
+					<tr>
+						<td>default_last_name</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>Will pre-populate the support form with the user's last name</td>
+					</tr>
+					<tr>
+						<td>default_email</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>Will pre-populate the support form with the user's email address</td>
+					</tr>
+					<tr>
+						<td>default_phone</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>Will pre-populate the support form with the user's phone number</td>
+					</tr>
+					<tr>
+						<td>default_department</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>the ID of department/category that will be automatically selected</td>
+					</tr> 
+				
+				
+					<tr class="divider">
+						<td colspan="4">
+							<a name="p-callback"></a>
+							Callback Functions
+						</td>
+					</tr>
+					
+					<tr>
+						<td>onLoad</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>A function to call when the plugin is loaded and ready</td>
+					</tr>
+					
+					<tr>
+						<td>onShow</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>A function to call whenever the popup/form shows</td>
+					</tr>
+					<tr>
+						<td>onHide</td>
+						<td class="status">Optional</td>
+						<td></td>
+						<td>A function to call whenever the popup/form closes</td>
+					</tr>
+			
+				</tbody>
+			</table>
+			
+			<h2><a name="customize"></a>Customizing the Plugin</h2>
+			
+			<h3>A Brief Introduction to Customizing the Plugin</h3>
+			<p>You have the ability to customize many aspects of both the tab and the form. You can view the <a href="#p-customization-options">Customization Options</a> and <a href="#p-text-labels">Text Labels</a> sections in the table above to see what all you can customize. Here is a vey basic example of how you can customize the plugin:</p>
+			<pre class="highlight">
+			&lt;script type="text/javascript"&gt;
+			$(function(){
+			
+			   $('html').HelpSpotWidget({
+			       host: 'http://support.yourdomain.com/',
+			       base: 'HelpSpot-Custom-Widget/',
+			       
+			       // Customize the Tab
+			       //-----------------------------
+			       
+			           // The type of tab to show (support, feedback, help, questions) 
+			           tab_type: 'feedback', 
+			           
+			           // The color of the tab (accepts hex codes and plain-text)
+			           tab_color: '#c00c00', 
+			           
+			           // Where to place the tab on the page (left, right)
+			           tab_alignment: 'right', 
+			           
+			           // How far from the top of the page to display the tab. (accepts px and %)
+			           tab_top: '40%', 
+			       
+			       // Customize Text Labels
+			       //-----------------------------
+			       
+			           // the text to use on the form submit button
+			           submit_button_text: 'Submit', 
+			           
+			           // The headline that the user sees upon success
+			           success_headline_text: 'Your Message Has Been Received!', 
+			           
+			           // a small blurb of text the user sees after they submit a ticket
+			           success_body_text: 'We will review your submission and someone will reply to you soon.' 
+			   });
+			   
+			});	
+			&lt;/script&gt;
+			</pre>
+			
+			<h3><a name="pre-populate"></a>Pre-populating Form Fields with a User's Data</h3>
+			<p>You also have the ability to pre-populate the value of the form fields. This allows you to customize the form per user. See the <a href="#p-populate-fields">Pre-Populating Fields</a> section in the table above to see what all you can do. Here is a basic example of how to pre-populate the form fields:</p>
+			<pre class="highlight">
+			&lt;?php
+			// Presumably, this data would be loaded dynamically from a database or other source 
+			// For our demo, we'll just create our own array
+			 $user = array(
+			    'first_name' => 'John',
+			    'last_name' => 'Doe',
+			    'email' => 'john@doe.com',
+			    'phone' => '555-123-4567'	  
+			);
+			?&gt;	
+			
+			&lt;script type="text/javascript"&gt;
+			$(function(){
+			
+			   $('html').HelpSpotWidget({
+			       host: 'http://support.yourdomain.com/',
+			       base: 'HelpSpot-Custom-Widget/',
+			       default_first_name: '&lt;?php echo $user['first_name']; ?&gt;',
+			       default_last_name: '&lt;?php echo $user['last_name']; ?&gt;',
+			       default_email: '&lt;?php echo $user['email']; ?&gt;',
+			       default_phone: '&lt;?php echo $user['phone']; ?&gt;'
+			   });
+			   
+			});	
+			&lt;/script&gt;
+			</pre>
+			
+			<h2><a name="themes"></a>Using Themes <span class="new" title="This section is new"></span></h2>
+			<p>New to this version of the plugin is the ability to use Themes to easily change the way your forms look. Using a theme is pretty simple -- It only requires you to add one more line of code that will include the stylesheet for the theme you want to use.</p>
+				
+			<h3><a name="how-to-use-themes"></a>How to Use Themes</h3>
+			<p>To use a theme, simply add the code found below (line #5) anywhere AFTER you've included the <code>widget.css</code> base stylesheet <small>(Seen on Line #2)</small>:</p>
+			<pre class="highlight">
+			&lt;!-- include our base stylesheet --&gt;
+			&lt;link href="HelpSpot-Custom-Widget/widget.css" rel="stylesheet" type="text/css" media="screen" /&gt;
+			
+			&lt;!-- include the stylesheet for our theme --&gt;
+			<span class="highlight">&lt;link href="HelpSpot-Custom-Widget/themes/{THEME-NAME}/style.css" rel="stylesheet" type="text/css" media="screen" /&gt;</span>
+			</pre>
+			<br />
+			<p>Of course, you would replace <code>{THEME-NAME}</code> with the name of the theme you want to use. Available themes can be found in the <code>themes/</code> directory.</p>
+			<p>Say, for example, that you wanted to use the included <i>clean</i> theme. This is the code you would use:</p>
+			<pre class="highlight">
+			&lt;!-- include the stylesheet for our theme --&gt;
+			&lt;link href="HelpSpot-Custom-Widget/themes/<span class="highlight">clean</span>/style.css" rel="stylesheet" type="text/css" media="screen" /&gt;
+			</pre>	
+			
+			<h3><a name="creating-themes"></a>Creating Your Own Themes</h3>
+			<p>It's not hard to create a new theme, but it does require you to have some knowledge of CSS. Follow these steps to create your own theme:</p>	
+			<ul>
+				<li>
+					Make a copy of the <code>theme_template</code> directory (found inside the <code>themes</code> directory), and rename it to whatever you want your theme to be named. <b>use single word names, or use hypens or underscores instead of spaces</b>. For our example, we'll call our custom theme <code>mytheme</code>.
+				</li> 
+				<li>So, you should now have the following directory stucture: <code>HelpSpot-Custom-Widget/themes/mytheme/</code></li>
+				<li>
+					Inside of our newly created <code>mytheme</code> directory you will see another directory named <code>images</code> and a css stylesheet named <code>style.css</code>.
+					<ul>
+						<li><code>style.css</code> is the CSS stylesheet used to override the "default" stylesheet and apply your theme's settings</li>
+						<li>
+						The <code>images</code> directory is used to hold any images used specifically for your theme. <b>NOTE:</b> Unless you change the default behavior in the css stylesheet, then the script expects to find the following three images in the <code>images</code> directory of the theme you are using: 
+							<ul>
+								<li><code>form-loading.gif</code> - The image (usually an animated .gif) that shows while the form is being loaded</li>
+								<li><code>form-submitting.gif</code> - The image (usually an animated .gif) that shows while the form is being submitted</li>
+								<li><code>close.gif</code> - The image that's used for the "close" button on the popup</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>
+					Edit your theme's <code>style.css</code> file to change the appearance of your form<br />
+					Using our example theme we created above, the file would be located at <code>HelpSpot-Custom-Widget/themes/mytheme/style.css</code>.<br />
+					Below are some of the basic elements you can edit that will change the appearance of your form. More advanced CSS users should be able to take what they learn here and customize their forms even further.
+					<ul class="no-bullets" style="padding-left: 0;">
+						<li>
+							<table class="styled" width="100%" cellpadding="0" cellspacing="0">
+								<thead>
+									<tr>
+										<th>CSS Selector</th>
+										<th style="width: 300px;">Description</th>
+										<th>Notes</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>#custom_widget_content</code></td>
+										<td>This is the actual "lightbox" that pops up and that contains all of the content.</td>
+										<td>Tthe border size and color are set here:<br /> <small>(border: 10px solid #E0CF14;)</small></td>
+									</tr>
+									<tr>
+										<td><code>#cw_form_container p#view_ticket</code></td>
+										<td>This is the "box" of text that the user sees when they successfully submit a ticket.</td>
+										<td>This element contains the user's AccessKey and the link to view their ticket.</td>
+									</tr>
+									
+									<tr>
+										<td><code>.cw_form.loading, #custom_widget_content.loading</code></td>
+										<td>This describes the "loading" state of the form. It only applies whenever the form content is loading</td>
+										<td>
+											This is where you would define your image (animated gif?) to show whenever the form is loading.
+											<br />Note: This is where, by default, <code>form-loading.gif</code> is used
+										</td>
+									</tr>
+									<tr>
+										<td><code>.cw_form span#cw_status_text.loading</code></td>
+										<td>The line of text that is shown when the submit button is clicked and the form is processing.</td>
+										<td>
+											It's a good idea to define a "loading" image (animated gif?) as well as the text color to use.
+											<br />Note: This is where, by default, <code>form-submitting.gif</code> is used
+										</td>
+									</tr>
+									<tr>
+										<td><code>a#custom_widget_close</code></td>
+										<td>This is the "close" button that is used to close the form and lightbox</td>
+										<td>
+											 If you are using the default style of close button then be sure to change the <u>background</u> color of this element to match the <u>border</u> color of #custom_widget_content
+											 <br />Note: This is where, by default, <code>close.gif</code> is used
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<br />
+						</li>
+					</ul>
+					<li>Make sure to upload your new theme directory (including all of its files and subdirectories) to the <code>themes/</code> directory of wherever you uploaded your HelpSpot Custom Widget files.</li>
+					<li>Finally, to start using your new theme just follow the steps above on "<a href="#how-to-use-themes">How To Use Themes</a>" -- replacing <code>{theme_name}</code> with the name of your newly created theme (probably "<code>mytheme</code>" if you've been following along the entire time)</li>
+				</li>
+			</ul>
+
+			<h2><a name="forms"></a>Using, Customizing, and Creating Forms</h2>
+			<p>This plugin allows you to create many different forms, and then dynamically set which form gets shown at run time. The main reason for this feature, besides allowing complete customization of the forms, is so that you can create different forms (ie: a form for support, one for suggestions, and one for comments) and then have the appropriate form show depending on what action the user takes.</p>
+			
+			<h3><a name="getting-started-with-forms"></a>Getting Started with Forms -- Things You Should Know! <span class="updated" title="This section has been updated"></span></h3>
+			<p>A major change in the new version of this plugin is the way that forms are handled. To allow for even futher control and customization, forms are, for the most part, "self contained" now. Basically, each form (even any custom form you might create) is now responsible for the following:</p>
+			<ul>
+				<li>Printing the HTML for the form itself</li>
+				<li>
+					Setting up and handling all AJAX and jQuery/Javacript 
+					<ul>
+						<li>Form validation rules</li>
+						<li>Formatting the form data to get it ready to submit</li>
+						<li>Submitting the form data to the HelpSpot API (by default this is done through the file <code>ajax.php</code>.)</li>
+					</ul>
+				</li>
+				<li>
+					Handling any messages that are returned from the HelpSpot API (or any other source, for that matter)
+					<ul>
+						<li>By default, this is done by using hidden &lt;div&gt tags (see the default <code>form.php</code> to get a better understanding of this)</li>
+					</ul>
+				</li>
+			</ul>
+			
+			<p>The first thing you should do is get more familiar with how the forms work. You can do this by examining the default <code>form.php</code>.</p>
+			
+			<h3><a name="ajax-dependency"></a>Forms and their Dependence on AJAX  <span class="new" title="This section is new"></span></h3>
+			<p>Since the forms are now loaded in a "lightbox" instead of an iFrame, you can no longer use the form's default "submit" function to submit, validate, and process the form. The only feasible solution to this was to use AJAX to handle everything -- the submission, validation, processing of the form data, etc.</p>
+			
+			<p>In the grand scheme of things, this isn't really a problem. I'll tell you why:</p>
+			<ul>
+				<li>This gives us the ability to validate the form data before the form is ever submitted -- this not only provides a better user experience, but it also cuts down on the number of times that a page must be loaded (ie: this will also help to decrease server usage)</li>
+				<li>Speaking of validating data, our new AJAX dependency "problem" gave me the ability to implement the <a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/" target="_blank">jQuery AJAX Validation</a> library to make it even easier to validate your form fields</li>
+				<li>For those security-conscience users, you have the ability to use the <code>ajax.php</code> file (or whatever file you define) to perform server-side data validation</li>
+				<li>Are you worried about users with older browsers that don't support AJAX/Javacript? Don't! They won't even be able to see the widget in the first place!</li>
+			</ul>
+			
+			<h3><a name="ajax-validation-option"></a>Forms and the AJAX Validation Option  <span class="new" title="This section is new"></span></h3>
+			<p>As mentioned above, the new version of this plugin has the <a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/" target="_blank">jQuery AJAX Validation library</a> included with it. While it is technically an <i>option</i> to use this library, it's highly recommended that you do! Mainly, because choosing to <b>not</b> use this option will create a ton of extra work for you. You see, not only does the validation feature validate the data, but it also takes care of displaying errors, submitting the form data to the API, handling the response, and much, much more... Basically, it does pretty much everything for you. If you choose to not use the AJAX Validation option then you will have to write the code to handle all of that yourself.</p>
+			
+			
+			<h3><a name="using-ajax-validation"></a>Using AJAX Validation on Your Forms  <span class="new" title="This section is new"></span></h3>	
+			<p>There are basically two ways of using the jQuery AJAX validation plugin within your forms: The easy way, and the "more technical" way. Let's start with the former:</p>
+			<ul>
+				<li>
+					<a name="ajax-validation-easy"></a>
+					<b>AJAX Validation: The Easy Way:</b><br />
+					The easiest way to implement AJAX validation is to simply be aware of how you name your form fields when creating your forms. Just adding certain <code>class</code> names to your form fields will cause the AJAX validation to automatically take effect! Let's look at some examples:<br /><br />
+					
+					Say you have a field for the user's first name that you want to be required. All you have to do is add the class "required": <br />
+					<span style="font-family:monospace">
+						&lt;input type="text" name="firstname" <span class="highlight">class="required"</span> value="" /&gt;
+					</span>
+					<br /><br />
+					Ok, that's cool enough, but what if you have a field for the user's email that needs to be required AND needs to be a valid email address? No Problem! Just add the classes "required" and "email":<br />
+					<span style="font-family:monospace">
+						&lt;input type="text" name="email" <span class="highlight">class="required email"</span> value="" /&gt;
+					</span>
+					<br /><br />
+					You can learn more about all kinds of cool stuff like this at the <a href="http://bassistance.de/jquery-plugins/jquery-plugin-validation/" target="_blank">AJAX Validation Library's author's page</a>.<br /><br />
+				</li>
+				
+				<li>
+					<a name="ajax-validation-hard"></a>
+					<b>AJAX Validation: The "More Technical" Way:</b><br />
+					Because we actually include the AJAX Validation plugin just like you would on any other page or site, you have full access to its options, API, methods, etc. In other words, you have 100% complete control over the AJAX Validation plugin. Be forewarned though, manually configuring the plugin is rather intimidating until you've done it a few times.<br /><br />
+					
+					As much as I love the validation plugin, its main downfall is its [lack of] documentation. To be honest, I learned more about how to use the plugin by viewing the source code of the <a href="http://jquery.bassistance.de/validate/demo/" target="_blank">plugin's demo pages</a>. To get a better understanding of how to set custom rules, messages, and more, I would recommend you do the same.<br /><br />
+					
+					If you already know what you're doing, or you want to give it a try anyways, you can add your custom validation rules to <code>form.php</code> (or whatever you've named your custom form) starting around line 167 (assuming that you're using the unedited code copied from <code>form.php</code>) -- either way, you will see a comment in the source code that tells you where to add your custom rules.
+				</li>
+				
+			</ul>
+				
+			<h3><a name="create-form"></a>Creating and Using a Custom Form <span class="updated" title="The section has been updated"></span></h3>
+			<p>To create a custom form it's recommended that you have experience with HTML, PHP, CSS, and a little jQuery knowledge wouldn't hurt either. Otherwise, you may find the required process a bit intimidating.</p>
+			<p>It's highly recommended that you start with a copy of the default <code>form.php</code>:</p>
+			<ul> 
+				<li>
+					Start by creating a new file <u>inside the Helpspot-Custom-Widget/ directory</u>. For our example, we'll name our file <code>custom_form.php</code>.<br />
+					So, now we should have something like: <code>Helpspot-Custom-Widget/custom_form.php</code>
+				</li>
+				<li>Next, copy the <b>entire</b> code from the original <code>form.php</code> and paste it into our newly created <code>custom_form.php</code> file.</li>
+				<li>Go ahead and save the changes made to <code>custom_form.php</code>.<br />
+					<b>ProTip:</b> Get in the habit of saving your work often!</li>
+			</ul>
+			<p>At this point, it's probably best to read over the code, line-by-line, in <code>custom_form.php</code> (or whatever you named your file) to get an understanding of what everything does. Assuming that you're using the unedited code from the original <code>form.php</code>, then the code is pretty well commented, so hopefully that will help you (and most of the comments are in PHP format, so they won't be printed in the page's code if you decide to leave them). Once you've got a good understanding of how it all works, you can start making changes such as adding or removing form fields, and more. </p>
+			<p>Ready to start making your own forms? Before you start, here's a few things to keep in mind:</p>
+			<ul>
+				<li>Please make sure to read (and fully understand) the section above titled <i><a href="#getting-started-with-forms">Getting Started with Forms -- Things You Should Know</a></i>.</li>
+				<li>If you're going to use the jQuery AJAX Validation library (I recommend you do), then consider doing it the <a href="#ajax-validation-easy">easy way</a> unless you need more control.</li>
+				<li>Remember to define your custom form when setting up the plugin (See the code below -- Line #7)</li>
+			</ul>
+			
+			<h3>Telling the Plugin to Use Your New Form</h3>
+			<pre class="highlight">
+			&lt;script type="text/javascript"&gt;
+			$(function(){
+			
+			   $('html').HelpSpotWidget({
+			       host: 'http://support.yourdomain.com/',
+			       base: 'HelpSpot-Custom-Widget/',
+			       <span class="highlight">form: 'custom_form.php'</span>
+			   });
+			   
+			});	
+			&lt;/script&gt;
+			</pre>
+			
+			<h3>Custom AJAX Files for Your Forms <span class="new" title="This section is new"></span></h3>
+			<p>Each form uses an external file (<code>ajax.php</code> by default) to handle certain actions -- mainly to submit the form data to the HelpSpot API. If you based your custom form off the original <code>form.php</code>, then there is a <i>chance</i> that the default <code>ajax.php</code> will work for you.</p>
+			<p>If the default <code>ajax.php</code> doesn't work for you then you'll need to create your own. Unfortunately, this is not a "beginner" task. It will require PHP knowledge, as well as jQuery/AJAX knowledge.</p>
+			<p>If you do have to use a custom file for your AJAX functions be sure to include it when setting up the plugin:</p>
+			<pre class="highlight">
+			&lt;script type="text/javascript"&gt;
+			$(function(){
+			
+			   $('html').HelpSpotWidget({
+			       host: 'http://support.yourdomain.com/',
+			       base: 'HelpSpot-Custom-Widget/',
+			       form: 'custom_form.php',
+			       <span class="highlight">ajax: 'custom_ajax.php'</span>
+			   });
+			   
+			});	
+			&lt;/script&gt;
+			</pre>
+			<h3>Forms, Forms, and More Forms!</h3>  
+			<p>Remember that you can have as many custom forms as you'd like -- Just <a href="#create-form">repeat the process above</a> whenever you want to create a new form. <b>Just make sure that each new form you create has a unique name!</b></p>
+				
+			<h2><a name="tabs"></a>Creating Custom Tabs</h2>
+			<p>A .psd file has been included if you would like to create your own custom tabs. Here's how to do it:</p>
+			<ul>
+				<li>Locate the .psd template at <code>HelpSpot-Custom-Widget/images/button-template.psd</code> and open it in Photoshop</li> 
+				<li>Once in Photoshop, select the text and change it to whatever you want. Keep in mind though, you only have about 95px of height to work with</li>
+				<li>Make sure that no background image is showing (ie: it has a transparent background)</li>
+				<li>Go to <code>File > Save for Web &amp; Devices</code> (or hold down ctrl+alt+shift+s)</li>
+				<li>
+					When the next screen pops up, choose <code>PNG-24</code> and check <code>Transparency</code>:
+					<br />
+					<img src="images/save-options.gif" alt="" />
+				</li>
+				<li>Next, hit the <code>Save</code> button, which will popup another window where you can name your new image</li>
+				<li>
+					It's recommended that you follow the existing naming convention, which is: <code>button-{button_text}.png</code><br />
+					For example, if the text on your new tab is "FAQs" then you should name your image <code>button-faqs.png</code> <small>(all lowercase)
+				</li>
+				<li>Save the image somewhere to your computer, and then use an FTP program to upload it to <code>HelpSpot-Custom-Widget/images</code> (or wherever you uploaded the plugin files)</li>
+				<li>
+					Edit <code>widget.css</code> and include the following code (this code uses the newly created "FAQs" tab from above. You may need to adjust accordingly)<br />
+					<pre class="highlight">
+						#custom_widget_tab.<span class="highlight">faqs</span> { background-image: url(images/button-<span class="highlight">faqs</span>.png); }
+					</pre>
+				</li>
+				<li>Finally, you need to tell the plugin to use your new button:</li>
+			</ul>
+			<pre class="highlight" style="margin: 0 0 0 50px;">
+			&lt;script type="text/javascript"&gt;
+			    $(function(){
+			        $('html').HelpSpotWidget({
+			            host: 'http://support.yourdomain.com/',
+			            base: 'HelpSpot-Custom-Widget/',
+	                    <span class="highlight">tab_type: 'faqs',</span>
+			        });
+				   
+    	    });	
+			&lt;/script&gt;
+			</pre>
+				
+					
+			
+			
+			
+		</div>
+		<!-- end wrapper -->
+		
+		
+	</body>
+</html>
